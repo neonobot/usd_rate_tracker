@@ -18,10 +18,11 @@ from app.func import (
 from app.logger_service import RequestLogger
 from app.tables import USDRate, Base, RequestLog
 
-# Создание таблицы логов в БД (если ее нет)
-Base.metadata.create_all(bind=engine, tables=[
-    RequestLog.__table__
-])
+try:
+    Base.metadata.create_all(bind=engine)
+except Exception as e:
+    print(f"Таблицы уже существуют или ошибка создания: {e}")
+
 
 app = FastAPI(
     title="USD Tracker API",

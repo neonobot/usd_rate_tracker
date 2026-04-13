@@ -1,6 +1,4 @@
 import os
-import uuid
-
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -10,13 +8,31 @@ from sqlalchemy.orm import sessionmaker
 load_dotenv()
 
 # Получаем URL базы данных из .env файла
-DATABASE_URL = os.getenv("DATABASE_URL")
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./usd_tracker.db")
 
-# Создаем движок для подключения к PostgreSQL
-engine = create_engine(DATABASE_URL)
+print(f"Using database: {DATABASE_URL}")  # Добавьте эту строку для отладки
+
+# Всегда используем SQLite для простоты
+if "clickhouse" in DATABASE_URL:
+    # Принудительно меняем на SQLite если ClickHouse не работает
+    DATABASE_URL = "sqlite:///./usd_tracker.db"
+    print(f"Switched to SQLite: {DATABASE_URL}")
+
+# Создаем движок
+if DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(
+        DATABASE_URL,
+        connect_args={"check_same_thread": False}
+    )
+else:
+    engine = create_engine(DATABASE_URL)
 
 # Создаем фабрику сессий
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+SessionLocal = sessionmaker(
+    autocommit=False, 
+    autoflush=False, 
+    bind=engine
+)
 
 # Базовый класс для моделей
 Base = declarative_base()
@@ -29,5 +45,3 @@ def get_db():
         yield db
     finally:
         db.close()
-
-

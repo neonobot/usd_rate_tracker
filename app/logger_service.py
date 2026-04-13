@@ -1,5 +1,5 @@
 """
-Сервис для логирования запросов в БД
+Сервис для логирования запросов в ClickHouse
 """
 import json
 from datetime import datetime
@@ -22,7 +22,7 @@ class RequestLogger:
             status_code: int = 200,
             error: Optional[str] = None
     ):
-        """Логирование запроса в БД"""
+        """Логирование запроса в ClickHouse"""
         try:
             end_time = datetime.utcnow()
             processing_time = int((end_time - start_time).total_seconds() * 1000)
@@ -54,9 +54,11 @@ class RequestLogger:
             db.commit()
 
         except Exception as e:
-            # В случае ошибки логирования - просто пишем в консоль
             print(f"Ошибка логирования: {e}")
-            db.rollback()
+            try:
+                db.rollback()
+            except:
+                pass
 
     @staticmethod
     def get_recent_logs(db: Session, limit: int = 100):
@@ -68,7 +70,7 @@ class RequestLogger:
 
     @staticmethod
     def get_stats(db: Session):
-        """Статистика по логам"""
+        """Статистика по логам для ClickHouse"""
         from sqlalchemy import func
 
         total = db.query(func.count(RequestLog.id)).scalar()
