@@ -83,6 +83,9 @@ numpy==1.26.2
 matplotlib==3.8.2
 ```
 
+## Превью 
+![usd_rate_tracker.gif](https://github.com/neonobot/usd_rate_tracker/blob/main/usd_rate_tracker.gif)
+
 ## Лицензия
 
 MIT
